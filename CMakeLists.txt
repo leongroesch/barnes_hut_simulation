@@ -8,6 +8,6 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_executable(${project_name} src/main.cpp src/character.cpp src/game_engine.cpp)
+add_executable(${project_name} src/main.cpp src/body.cpp src/game_engine.cpp src/barnes_hut.cpp)
 
 target_link_libraries(${project_name} sfml-graphics sfml-window sfml-system)

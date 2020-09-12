@@ -1,16 +1,26 @@
 #ifndef _GAME_ENGINE_H_
 #define _GAME_ENGINE_H_
 
+#include <random> 
+#include <memory>
+#include <iostream>
+
 #include <SFML/Graphics.hpp>
 
-#include "game_object.h"
-#include "character.h"
+#include "body.h"
+#include "barnes_hut.h"
 
 class game_engine{
   private:
     sf::RenderWindow window;
     sf::Clock update_clock;
-    std::vector<game_object> game_objects;
+    sf::Clock fps_clock;
+    std::vector<std::shared_ptr<body>> bodys;
+
+    barnes_hut barnes;
+
+    bool paused{true};
+    uint16_t fps_count{0};
 
     void event_handler();
     void update();
