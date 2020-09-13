@@ -1,7 +1,7 @@
 #include "barnes_hut.h"
 
-barnes_hut::barnes_hut(sf::Vector2u window_size)  
-        : root(std::make_shared<node>(node(sf::Vector2u(0,0), window_size )))
+barnes_hut::barnes_hut(uint field_size)  
+        : root(std::make_shared<node>(node(sf::Vector2u(0,0), sf::Vector2u(field_size, field_size) )))
 {
    nodes.push_back(root); 
 }

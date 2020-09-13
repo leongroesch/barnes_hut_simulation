@@ -12,7 +12,11 @@
 
 class game_engine{
   private:
+    constexpr static uint field_size{50000};
+
     sf::RenderWindow window;
+    sf::View view;
+
     sf::Clock update_clock;
     sf::Clock fps_clock;
     std::vector<std::shared_ptr<body>> bodys;

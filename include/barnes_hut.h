@@ -42,7 +42,7 @@ class barnes_hut
     void sub_tree_apply_forces(std::shared_ptr<node> sub_tree, std::shared_ptr<body> apply_body);
 
   public:
-    barnes_hut(sf::Vector2u window_size);
+    barnes_hut(uint field_size);
     void reset();
     void insert_body(std::shared_ptr<body> new_body);
     void draw_rects(sf::RenderWindow& window) const;

@@ -16,8 +16,28 @@ body::body(sf::Vector2f position, double mass, float radius, sf::Color color)
 } 
 
 
+void body::compute_collision()
+{
+  if(combine_with)
+  {
+    mass += combine_with->get_mass();
+
+    float area = M_PI * std::pow(get_radius(), 2);
+    area += M_PI * std::pow(combine_with->get_radius(), 2);
+    circle_shape.setRadius( std::sqrt(area / M_PI));
+
+    velocity.x += combine_with->get_velocity().x;
+    velocity.y += combine_with->get_velocity().y;
+
+    combine_with.reset();
+  }
+
+}
+
+
 void body::update(sf::Time elapsed_time)
 {
+  // Calculate movement
   acceleration.x = force.x/mass;
   acceleration.y = force.y/mass;
 
@@ -25,6 +45,8 @@ void body::update(sf::Time elapsed_time)
   velocity += acceleration * elapsed_time.asSeconds();
 
   circle_shape.move(velocity * elapsed_time.asSeconds()); 
+
+  compute_collision();
 }
 
 void body::apply_force(sf::Vector2f other_center, double other_mass)
@@ -52,15 +74,18 @@ void body::check_collision(std::shared_ptr<body> other)
   }
   //Intersect
   else if (square_rad_sum > square_dist){
-    sf::Vector2f tmp(velocity.x, velocity.y);
-    tmp.x = tmp.x * -0.5; tmp.y = tmp.y * -0.5;
-    set_velocity(tmp);
-
-    tmp = other->get_velocity();
-    tmp.x *= -0.5; tmp.y *= -0.5;
-    other->set_velocity(tmp);
+    if (!remove  && !other->get_remove() &&
+        mass > other->get_mass()){
+      other->set_remove();
+      combine_with = other;
+    }
   }
 
+}
+
+void body::set_remove()
+{
+  remove = true;
 }
 
 void body::set_acceleration(sf::Vector2f acceleration)
@@ -71,6 +96,11 @@ void body::set_acceleration(sf::Vector2f acceleration)
 void body::set_velocity(sf::Vector2f velocity)
 {
   this->velocity = velocity;
+}
+
+bool body::get_remove() const
+{
+  return remove;
 }
 
 sf::CircleShape body::get_circle_shape() const
@@ -95,7 +125,7 @@ double body::get_mass() const
   return mass;
 }
 
-int body::get_radius() const
+float body::get_radius() const
 {
   return circle_shape.getRadius();
 }
