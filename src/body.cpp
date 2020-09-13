@@ -3,16 +3,16 @@
 #include <iostream>
 
 body::body(sf::Vector2f position, sf::Vector2f velocity, sf::Vector2f acceleration, double mass, float radius) 
-                      : sf::CircleShape(radius), velocity(velocity), acceleration(acceleration), mass(mass)
+                      : circle_shape(radius), velocity(velocity), acceleration(acceleration), mass(mass)
 {
-   setPosition(position.x - getRadius(), position.y - getRadius());
+   circle_shape.setPosition(position.x - radius, position.y - radius);
 }
 
 body::body(sf::Vector2f position, double mass, float radius, sf::Color color)
-                      : sf::CircleShape(radius), mass(mass)
+                      : circle_shape(radius), mass(mass)
 {
-  setPosition(position.x - getRadius(), position.y - getRadius());
-  setFillColor(color);
+  circle_shape.setPosition(position.x - radius, position.y - radius);
+  circle_shape.setFillColor(color);
 } 
 
 
@@ -24,7 +24,7 @@ void body::update(sf::Time elapsed_time)
   force.x = 0; force.y = 0;
   velocity += acceleration * elapsed_time.asSeconds();
 
-  move(velocity * elapsed_time.asSeconds()); 
+  circle_shape.move(velocity * elapsed_time.asSeconds()); 
 }
 
 void body::apply_force(sf::Vector2f other_center, double other_mass)
@@ -44,7 +44,7 @@ void body::apply_force(sf::Vector2f other_center, double other_mass)
 void body::check_collision(std::shared_ptr<body> other)
 {
   float square_dist = other->get_square_distance(get_center());
-  float square_rad_sum = std::pow(getRadius()+other->getRadius(), 2);
+  float square_rad_sum = std::pow(get_radius()+other->get_radius(), 2);
 
   //Touch
   if (square_rad_sum == square_dist){
@@ -73,32 +73,42 @@ void body::set_velocity(sf::Vector2f velocity)
   this->velocity = velocity;
 }
 
-float body::get_distance(sf::Vector2f point)
+sf::CircleShape body::get_circle_shape() const
+{
+  return circle_shape;
+}
+
+float body::get_distance(sf::Vector2f point) const
 {
   sf::Vector2f tmp = get_center() - point;
   return std::sqrt( std::pow(tmp.x, 2) + std::pow(tmp.y, 2));
 }
 
-float body::get_square_distance(sf::Vector2f point)
+float body::get_square_distance(sf::Vector2f point) const
 {
   sf::Vector2f tmp = get_center() - point;
   return std::pow(tmp.x, 2) + std::pow(tmp.y, 2);
 }
 
-double body::get_mass()
+double body::get_mass() const
 {
   return mass;
 }
 
-sf::Vector2f body::get_center()
+int body::get_radius() const
 {
-  sf::Vector2f result = getPosition();
-  result.x += getRadius();
-  result.y += getRadius();
+  return circle_shape.getRadius();
+}
+
+sf::Vector2f body::get_center() const
+{
+  sf::Vector2f result = circle_shape.getPosition();
+  result.x += circle_shape.getRadius();
+  result.y += circle_shape.getRadius();
   return result;
 }
 
-sf::Vector2f body::get_velocity()
+sf::Vector2f body::get_velocity() const
 {
   return velocity;
 }

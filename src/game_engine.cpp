@@ -112,7 +112,7 @@ void game_engine::draw()
   window.clear();
   for(auto x : bodys)
   {
-    window.draw(*x);
+    window.draw(x->get_circle_shape());
   }
   //barnes.draw_rects(window);
   window.display();
