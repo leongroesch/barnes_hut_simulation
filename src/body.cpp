@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+
+/* ##################### Constructor #####################*/
+
 body::body(sf::Vector2f position, sf::Vector2f velocity, sf::Vector2f acceleration, double mass, float radius) 
                       : circle_shape(radius), velocity(velocity), acceleration(acceleration), mass(mass)
 {
@@ -15,15 +18,18 @@ body::body(sf::Vector2f position, double mass, float radius, sf::Color color)
   circle_shape.setFillColor(color);
 } 
 
+/* ##################### Private #####################*/
 
 void body::compute_collision()
 {
+  static constexpr float loss_factor = 0.7;
   if(combine_with)
   {
-    mass += combine_with->get_mass();
+
+    mass += loss_factor * combine_with->get_mass();
 
     float area = M_PI * std::pow(get_radius(), 2);
-    area += M_PI * std::pow(combine_with->get_radius(), 2);
+    area += M_PI * std::pow(combine_with->get_radius(), 2) * loss_factor;
     circle_shape.setRadius( std::sqrt(area / M_PI));
 
     velocity.x += combine_with->get_velocity().x;
@@ -34,17 +40,17 @@ void body::compute_collision()
 
 }
 
-
+/* ##################### Public #####################*/
 void body::update(sf::Time elapsed_time)
 {
   // Calculate movement
-  acceleration.x = force.x/mass;
-  acceleration.y = force.y/mass;
+  acceleration.x = force.x / mass;
+  acceleration.y = force.y / mass;
 
   force.x = 0; force.y = 0;
-  velocity += acceleration * elapsed_time.asSeconds();
+  velocity += acceleration * (elapsed_time.asSeconds() * (float)36e4);
 
-  circle_shape.move(velocity * elapsed_time.asSeconds()); 
+  circle_shape.move(velocity * (elapsed_time.asSeconds() * (float)36e4));
 
   compute_collision();
 }
@@ -54,7 +60,7 @@ void body::apply_force(sf::Vector2f other_center, double other_mass)
   double square_dist = get_square_distance(other_center);
   if (square_dist == 0)
     return;
-  double force_abs = (big_g * mass * other_mass) / square_dist;
+  double force_abs = (big_g  * mass * other_mass) / square_dist;
 
   float force_x = (other_center.x - get_center().x) / get_distance(other_center);
   float force_y = (other_center.y - get_center().y) / get_distance(other_center);
@@ -83,20 +89,15 @@ void body::check_collision(std::shared_ptr<body> other)
 
 }
 
+/********** Setter **********/
+
 void body::set_remove()
 {
   remove = true;
 }
 
-void body::set_acceleration(sf::Vector2f acceleration)
-{
-    this->acceleration = acceleration;
-}
 
-void body::set_velocity(sf::Vector2f velocity)
-{
-  this->velocity = velocity;
-}
+/********** Getter **********/
 
 bool body::get_remove() const
 {
@@ -141,4 +142,16 @@ sf::Vector2f body::get_center() const
 sf::Vector2f body::get_velocity() const
 {
   return velocity;
+}
+
+/********** Debug **********/
+void body::display() const
+{
+  std::cout << mass << std::endl;
+
+  std::cout << "Acceleration : (" << acceleration.x << "|" << acceleration.y << ")\n"; 
+
+  std::cout << "Velocity : (" << velocity.x << "|" << velocity.y << ")\n";
+  
+  std::cout << "Position : (" << get_center().x << "|" << get_center().y << ")\n";
 }

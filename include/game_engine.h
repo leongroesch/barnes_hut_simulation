@@ -4,6 +4,7 @@
 #include <random> 
 #include <memory>
 #include <iostream>
+#include <cmath>
 
 #include <SFML/Graphics.hpp>
 
@@ -12,7 +13,7 @@
 
 class game_engine{
   private:
-    constexpr static uint field_size{50000};
+    constexpr static float field_size{30e10};
 
     sf::RenderWindow window;
     sf::View view;

@@ -1,7 +1,7 @@
 #include "barnes_hut.h"
 
-barnes_hut::barnes_hut(uint field_size)  
-        : root(std::make_shared<node>(node(sf::Vector2u(0,0), sf::Vector2u(field_size, field_size) )))
+barnes_hut::barnes_hut(float field_size)  
+        : root(std::make_shared<node>(node(sf::Vector2f(0,0), sf::Vector2f(field_size, field_size) )))
 {
    nodes.push_back(root); 
 }
@@ -24,26 +24,22 @@ void barnes_hut::node::add_body(std::shared_ptr<body> new_body)
     return;
   float old_mass = mass;
   mass += new_body->get_mass();
-  center_of_mass.x = (center_of_mass.x * old_mass + new_body->get_center().x * new_body->get_mass()) / mass;
-  center_of_mass.y = (center_of_mass.y * old_mass + new_body->get_center().y * new_body->get_mass()) / mass;
+  
+  center_of_mass.x = ((double)center_of_mass.x * old_mass + new_body->get_center().x * new_body->get_mass())/mass;
+  center_of_mass.y = ((double)center_of_mass.y * old_mass + new_body->get_center().y * new_body->get_mass())/mass;
 }
 
 void barnes_hut::node::create_children()
 {
-  uint left_width = area.width/2 + (area.width%2);
-  uint right_width = area.width/2;
-  uint top_height = area.height/2 + (area.height%2);
-  uint bottom_height = area.height/2;
+  sf::Vector2f child_area(floor(area.width/2), floor(area.height/2));
 
   for(uint i = 0; i < 4; i++)
   {
-    sf::Vector2u child_position;
-    child_position.x = area.left + left_width * (i%2);
-    child_position.y = area.top + top_height * (i >= 2);
-    sf::Vector2u child_area;
-    child_area.x = (i%2) ? left_width : right_width;
-    child_area.y = (i<2) ? top_height : bottom_height;
-    children[i] = std::make_shared<node>(node(child_position ,child_area));
+    sf::Vector2f child_position;
+    child_position.x = area.left + child_area.x * (i%2);
+    child_position.y = area.top + child_area.y * (i >= 2);
+      
+    children[i] = std::make_shared<node>(node(child_position , child_area));
   }
 }
 
@@ -58,7 +54,7 @@ void barnes_hut::sub_tree_insert_body(std::shared_ptr<body> new_body, std::share
   else if ( sub_tree->is_internal() ){
     sub_tree->add_body(new_body);
     for(uint i = 0; i < 4; i++)
-      if(sub_tree->children[i]->area.contains(sf::Vector2u(new_body->get_center())))
+      if(sub_tree->children[i]->area.contains(new_body->get_center()))
         sub_tree_insert_body(new_body, sub_tree->children[i]);
   }
   else{
@@ -72,10 +68,10 @@ void barnes_hut::sub_tree_insert_body(std::shared_ptr<body> new_body, std::share
       nodes.push_back(sub_tree->children[i]);
     //Insert bodys in new children
     for(uint8_t i = 0; i < 4; i++)
-      if(sub_tree->children[i]->area.contains(sf::Vector2u(new_body->get_center())))
+      if(sub_tree->children[i]->area.contains(new_body->get_center()))
         sub_tree_insert_body(new_body, sub_tree->children[i]);
     for(uint8_t i = 0; i < 4; i++)
-      if(sub_tree->children[i]->area.contains(sf::Vector2u(reinsert_body->get_center())))
+      if(sub_tree->children[i]->area.contains(reinsert_body->get_center()))
         sub_tree_insert_body(reinsert_body, sub_tree->children[i]);
   }
 }
@@ -123,7 +119,7 @@ void barnes_hut::draw_rects(sf::RenderWindow& window) const
 {
   sf::RectangleShape rect;
   rect.setFillColor(sf::Color::Transparent);
-  rect.setOutlineThickness(0.5);
+  rect.setOutlineThickness(5e7);
   rect.setOutlineColor(sf::Color::White);
   for(auto n : nodes){
     if(n){

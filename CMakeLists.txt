@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(project_name "game_engine")
+set(project_name "barnes_hut")
 
 project(${project_name})
 

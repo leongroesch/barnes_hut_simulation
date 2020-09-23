@@ -10,60 +10,68 @@ game_engine::game_engine(sf::VideoMode video_mode, std::string title)
   window.setView(view);
 
   
-  const int num_body = 100;
-  const double mass_enhancement = 10e15;
+  // const int num_body = 1500;
+  // const double mass_enhancement = 10e15;
 
-  std::random_device random_device;
-  std::mt19937 random_engine(random_device());
-  std::uniform_int_distribution<int> dist_position(0, field_size);
-  std::uniform_int_distribution<int> dist_velocity(-500, 500);
-  std::uniform_int_distribution<int> dist_mass_hole(100, 1000);
-  std::uniform_int_distribution<int> dist_mass_small(100, 400);
+  // std::random_device random_device;
+  // std::mt19937 random_engine(random_device());
+  // std::uniform_int_distribution<int> dist_position(0, field_size);
+  // std::uniform_int_distribution<int> dist_velocity(field_size/1000 *-1, field_size/1000);
+  // std::uniform_int_distribution<int> dist_mass_hole(field_size/5000, field_size/600);
+  // std::uniform_int_distribution<int> dist_mass_small(field_size/5000, field_size/1000);
 
-  for(uint16_t i = 0; i < num_body; i++)
-  {
-    sf::Vector2f position(dist_position(random_engine), dist_position(random_engine));
-    sf::Vector2f velocity(dist_velocity(random_engine), dist_velocity(random_engine));
-    sf::Vector2f acceleration(0,0);
-    double mass = (i%11 == 0) ? dist_mass_hole(random_engine) : dist_mass_small(random_engine);
-    mass *= mass_enhancement;
-    std::cout << "Mass: "<< mass << "\n";
-    bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, mass, mass/mass_enhancement)));
-    barnes.insert_body(bodys.back());
-  }
+  // for(uint16_t i = 0; i < num_body; i++)
+  // {
+  //   sf::Vector2f position(dist_position(random_engine), dist_position(random_engine));
+  //   sf::Vector2f velocity(dist_velocity(random_engine), dist_velocity(random_engine));
+  //   sf::Vector2f acceleration(0,0);
+  //   double mass = (i%11 == 0) ? dist_mass_hole(random_engine) : dist_mass_small(random_engine);
+  //   mass *= mass_enhancement;
+  //   std::cout << "Mass: "<< mass << "\n";
+  //   bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, mass, mass/mass_enhancement)));
+  //   barnes.insert_body(bodys.back());
+  // }
   
 
- /* sf::Vector2f position(window.getSize().x/2, window.getSize().y/2);
+  sf::Vector2f position(window.getSize().x/2, window.getSize().y/2);
   sf::Vector2f velocity(0, 0);//(dist_velocity(random_engine), dist_velocity(random_engine));
   sf::Vector2f acceleration(0,0);
-  double mass = 1.988e16;
   // bodys.push_back(std::make_shared<body>(body(position, mass, 15, sf::Color::Red)));
   // barnes.insert_body(bodys.back());
 
-  position.x = window.getSize().x/2 + 100; position.y = window.getSize().y/2 + 100;
-  velocity.x = -10; velocity.y = -5;
-  mass = 5.972e15;
-  bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, mass, 10)));
+
+  //Sun
+  bodys.push_back(std::make_shared<body>(body(view.getCenter(), velocity, acceleration, 1.989e30, 695e6)));
   barnes.insert_body(bodys.back());
 
-  // position.x = window.getSize().x/2 + 300; position.y = window.getSize().y/2 - 300;
-  // velocity.x = -3; velocity.y = 20;
+  //Earth
+  position.x = view.getCenter().x + 149.64e9; position.y = view.getCenter().y;
+  velocity.x = 0; velocity.y = 29.86e3;
+  bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, 5.972e24, 695e6)));
+  barnes.insert_body(bodys.back());
+
+  //Venus
+  position.x = view.getCenter().x + 108e9; position.y = view.getCenter().y;
+  velocity.x = 0; velocity.y = 32.32e3;
+  bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, 4.87e24, 695e6)));
+  barnes.insert_body(bodys.back());
+
+  std::cout << "Square dist: " << bodys.back()->get_square_distance(bodys.front()->get_center()) << std::endl;
+
+  //bodys.back()->set_orbit(view.getCenter(), (2*M_PI/60));
+
+
+  // position.x = view.getCenter().x + 300; position.y = view.getCenter().y - 300;
   // mass = 5.972e15;
   // bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, mass, 10)));
   // barnes.insert_body(bodys.back());
 
-  position.x = window.getSize().x/2 - 100; position.y = window.getSize().y/2 - 100;
-  velocity.x = 30; velocity.y = 40;
-  mass = 5.972e15;
-  bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, mass, 10)));
-  barnes.insert_body(bodys.back());
-
-  // position.x = window.getSize().x/2 - 300; position.y = window.getSize().y/2 + 300;
-  // velocity.x = 10; velocity.y = -3;
+  // position.x = view.getCenter().x - 100; position.y = view.getCenter().y - 100;
   // mass = 5.972e15;
   // bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, mass, 10)));
   // barnes.insert_body(bodys.back());
-  */
+
+  
 }
 void game_engine::event_handler()
 {
@@ -108,17 +116,42 @@ void game_engine::update()
   if (!paused)
   {
     barnes.reset();
-    for(auto x : bodys)
+    for(auto& x : bodys)
     {
       barnes.insert_body(x);
     }
+
+    /* Barnes Hut */
+
+    for(auto& x : bodys)
+    {
+      barnes.apply_forces(x);
+    }
+
+    /* Brute Force */ 
+
+    // for(auto& x : bodys)
+    // {
+    //   for(auto& y : bodys)
+    //   {
+    //     if(x != y)
+    //       x->apply_force(y->get_center(), y->get_mass() );
+    //   }
+    // }
+
     for(auto it = bodys.begin(); it != bodys.end(); )
     {
       (*it)->update(elapsed_time);
-      barnes.apply_forces(*it);
 
+      if( std::isnan((*it)->get_velocity().x) || std::isnan((*it)->get_velocity().y) )
+      {
+        paused = true;
+      }
       if((*it)->get_remove())
+      {
         it = bodys.erase(it);
+        std::cout << "Removed\n";
+      }
       else
         it++;
       
@@ -130,11 +163,14 @@ void game_engine::update()
 void game_engine::draw()
 {
   window.clear();
+  float zoom_factor = window.getSize().x / view.getSize().x;
   for(auto x : bodys)
   {
-    window.draw(x->get_circle_shape());
+    // Only draw seeable objects
+    if( x->get_radius()*zoom_factor >= 0.7 )
+      window.draw(x->get_circle_shape());
   }
-  //barnes.draw_rects(window);
+  // barnes.draw_rects(window);
   window.display();
 }
 

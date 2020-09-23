@@ -2,6 +2,7 @@
 #define _BARNES_HUT_H_
 
 #include <memory>
+#include <cmath>
 
 #include <SFML/Graphics.hpp>
 
@@ -14,14 +15,14 @@ class barnes_hut
     class node
     {
       public:
-        sf::Vector2f center_of_mass;
+        sf::Vector2f center_of_mass{0, 0};
         float mass{0};
 
-        sf::Rect<uint> area; 
+        sf::Rect<float> area; 
         std::shared_ptr<node> children[4];
         std::shared_ptr<body> contained_body;
 
-        node(sf::Vector2u position, sf::Vector2u size) : area(position, size) {};
+        node(sf::Vector2f position, sf::Vector2f size) : area(position, size){};
 
         bool is_internal() const;
 
@@ -42,7 +43,7 @@ class barnes_hut
     void sub_tree_apply_forces(std::shared_ptr<node> sub_tree, std::shared_ptr<body> apply_body);
 
   public:
-    barnes_hut(uint field_size);
+    barnes_hut(float field_size);
     void reset();
     void insert_body(std::shared_ptr<body> new_body);
     void draw_rects(sf::RenderWindow& window) const;
