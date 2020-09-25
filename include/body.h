@@ -26,7 +26,7 @@ class body{
 
   public:
     body(sf::Vector2f position, sf::Vector2f velocity, sf::Vector2f acceleration, double mass, float radius);
-    body(sf::Vector2f position, double mass, float radius, sf::Color color);
+    body(sf::Vector2f position, sf::Vector2f velocity, double mass, float radius, sf::Color color);
 
     void update(sf::Time elapsed_time);
     void apply_force(sf::Vector2f other_center, double other_mass);

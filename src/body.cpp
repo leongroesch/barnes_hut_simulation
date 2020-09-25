@@ -11,8 +11,8 @@ body::body(sf::Vector2f position, sf::Vector2f velocity, sf::Vector2f accelerati
    circle_shape.setPosition(position.x - radius, position.y - radius);
 }
 
-body::body(sf::Vector2f position, double mass, float radius, sf::Color color)
-                      : circle_shape(radius), mass(mass)
+body::body(sf::Vector2f position, sf::Vector2f velocity, double mass, float radius, sf::Color color)
+                      : circle_shape(radius), velocity(velocity), mass(mass)
 {
   circle_shape.setPosition(position.x - radius, position.y - radius);
   circle_shape.setFillColor(color);

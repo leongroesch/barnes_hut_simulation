@@ -10,6 +10,7 @@
 
 #include "body.h"
 #include "barnes_hut.h"
+#include "json_parser.h"
 
 class game_engine{
   private:

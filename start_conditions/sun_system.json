@@ -1,0 +1,23 @@
+{
+  "Sun":{
+    "position": {"x": 0, "y": 0},
+    "velocity": {"x": 0, "y": 0},
+    "mass": 1.989e30,
+    "radius": 695e6,
+    "color": {"r": 255, "g": 255, "b": 0}
+  },
+  "Venus":{
+    "position": {"x": 108e9 , "y": 0},
+    "velocity": {"x": 0, "y": 32.32e3},
+    "mass": 4.87e24,
+    "radius": 695e6,
+    "color": {"r": 255, "g": 255, "b": 200}
+  },
+  "earth":{
+    "position": {"x": 149.64e9 , "y": 0},
+    "velocity": {"x": 0, "y":  29.86e3},
+    "mass": 5.972e24,
+    "radius": 695e6,
+    "color": {"r": 100, "g": 100, "b": 255}
+  }
+}

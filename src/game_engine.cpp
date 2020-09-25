@@ -2,11 +2,12 @@
 #include "game_engine.h"
 
 
-
 game_engine::game_engine(sf::VideoMode video_mode, std::string title) 
                 : window(video_mode, title), barnes(field_size)
 {
-  view.reset(sf::FloatRect(0, 0, field_size, field_size));
+  /* TODO: manage field_size */
+  float half_fz = field_size/2;
+  view.reset(sf::FloatRect(-half_fz, -half_fz, field_size, field_size));
   window.setView(view);
 
   
@@ -33,44 +34,17 @@ game_engine::game_engine(sf::VideoMode video_mode, std::string title)
   // }
   
 
-  sf::Vector2f position(window.getSize().x/2, window.getSize().y/2);
-  sf::Vector2f velocity(0, 0);//(dist_velocity(random_engine), dist_velocity(random_engine));
-  sf::Vector2f acceleration(0,0);
-  // bodys.push_back(std::make_shared<body>(body(position, mass, 15, sf::Color::Red)));
-  // barnes.insert_body(bodys.back());
+  // sf::Vector2f position(window.getSize().x/2, window.getSize().y/2);
+  // sf::Vector2f velocity(0, 0);//(dist_velocity(random_engine), dist_velocity(random_engine));
+  // sf::Vector2f acceleration(0,0);
+  // // bodys.push_back(std::make_shared<body>(body(position, mass, 15, sf::Color::Red)));
+  // // barnes.insert_body(bodys.back());
 
-
-  //Sun
-  bodys.push_back(std::make_shared<body>(body(view.getCenter(), velocity, acceleration, 1.989e30, 695e6)));
-  barnes.insert_body(bodys.back());
-
-  //Earth
-  position.x = view.getCenter().x + 149.64e9; position.y = view.getCenter().y;
-  velocity.x = 0; velocity.y = 29.86e3;
-  bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, 5.972e24, 695e6)));
-  barnes.insert_body(bodys.back());
-
-  //Venus
-  position.x = view.getCenter().x + 108e9; position.y = view.getCenter().y;
-  velocity.x = 0; velocity.y = 32.32e3;
-  bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, 4.87e24, 695e6)));
-  barnes.insert_body(bodys.back());
-
-  std::cout << "Square dist: " << bodys.back()->get_square_distance(bodys.front()->get_center()) << std::endl;
-
-  //bodys.back()->set_orbit(view.getCenter(), (2*M_PI/60));
-
-
-  // position.x = view.getCenter().x + 300; position.y = view.getCenter().y - 300;
-  // mass = 5.972e15;
-  // bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, mass, 10)));
-  // barnes.insert_body(bodys.back());
-
-  // position.x = view.getCenter().x - 100; position.y = view.getCenter().y - 100;
-  // mass = 5.972e15;
-  // bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, mass, 10)));
-  // barnes.insert_body(bodys.back());
-
+  for(auto& x : Json_parser::parse("../start_conditions/sun_system.json"))
+  {
+    bodys.push_back(std::make_shared<body>(x));
+    barnes.insert_body(bodys.back());
+  }
   
 }
 void game_engine::event_handler()
