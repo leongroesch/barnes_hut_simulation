@@ -3,10 +3,17 @@
 
 /* ##################### Constructor #####################*/
 
-game_engine::game_engine(sf::VideoMode video_mode, std::string title) 
+game_engine::game_engine(sf::VideoMode video_mode, std::string title, std::vector<std::string> arguments) 
                 : window(video_mode, title), barnes(field_size)
-{  
-  for(auto& bod : Json_parser::parse("../start_conditions/sun_system.json"))
+{ 
+  bool centralized = false;
+  if(arguments.size() >= 2 && arguments.at(0) == "centralized")
+    centralized = true;
+  std::string file = "";
+  if(arguments.size() >= 2)
+    file = "../initial_conditions/" + arguments.at(1);
+
+  for(auto& bod : Json_parser::parse(file, centralized))
   {
     auto max_dist = std::max(bod.get_center().x, bod.get_center().y);
     field_size = std::max(field_size, max_dist );

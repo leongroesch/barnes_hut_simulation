@@ -34,7 +34,7 @@ class game_engine{
     void update(sf::Time elapsed_time);
     void draw();
   public:
-    game_engine(sf::VideoMode video_mode, std::string title);
+    game_engine(sf::VideoMode video_mode, std::string title, std::vector<std::string> arguments);
     void main_loop();
 };
 

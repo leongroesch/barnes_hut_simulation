@@ -1,0 +1,52 @@
+{
+  "Sun":{
+    "distance": 0,
+    "orbit_time_days": 0,
+    "mass": 1.989e30,
+    "radius": 200e8,
+    "color": {"r": 255, "g": 255, "b": 0} 
+  },
+  "Mercury":{
+    "distance": 57e9,
+    "orbit_time_days": 87.97,
+    "mass": 3.3011e24,
+    "radius": 500e7,
+    "color": {"r": 255, "g": 255, "b": 200}
+  },
+  "Venus":{
+    "distance": 108e9,
+    "orbit_time_days": 224.7,
+    "mass": 4.87e24,
+    "radius": 600e7,
+    "color": {"r": 255, "g": 255, "b": 150}
+  },
+  "Earth":{
+    "distance": 149.59e9,
+    "orbit_time_days": 365.25,
+    "mass": 5.97e24,
+    "radius": 700e7,
+    "color": {"r": 0, "g": 50, "b": 250}
+  },
+  "Mars":{
+    "distance": 230e9,
+    "orbit_time_days": 686.98,
+    "mass": 6.4171e23,
+    "radius": 500e7,
+    "color": {"r": 255, "g": 50, "b": 50}
+  },
+  "Jupiter":{
+    "distance": 778e9,
+    "orbit_time_days": 4332.59,
+    "mass": 1.8982e27,
+    "radius": 100e8,
+    "color": {"r": 255, "g": 150, "b": 150}
+  },
+  "Saturn":{
+    "distance": 1.429e12,
+    "orbit_time_days": 10759,
+    "mass": 5.6834e26,
+    "radius": 50e8,
+    "color": {"r": 150, "g": 150, "b": 150}
+  }
+  
+}
