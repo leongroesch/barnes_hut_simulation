@@ -44,6 +44,7 @@ class barnes_hut
 
   public:
     barnes_hut(float field_size);
+    void reset(sf::Rect<float> area);
     void reset();
     void insert_body(std::shared_ptr<body> new_body);
     void draw_rects(sf::RenderWindow& window) const;

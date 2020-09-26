@@ -97,6 +97,12 @@ void barnes_hut::sub_tree_apply_forces(std::shared_ptr<node> sub_tree, std::shar
 }
 
 /* ##################### Public #####################*/
+void barnes_hut::reset(sf::Rect<float> area)
+{
+  root->area = area;
+  reset();
+}
+
 void barnes_hut::reset()
 {
   root->mass = 0;
