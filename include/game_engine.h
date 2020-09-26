@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include <SFML/Graphics.hpp>
+#include <TGUI/TGUI.hpp>
 
 #include "body.h"
 #include "barnes_hut.h"
@@ -21,6 +22,9 @@ class game_engine{
     sf::RenderWindow window;
     sf::View view;
 
+    tgui::Gui gui{window};
+    tgui::Slider::Ptr slider;
+
     sf::Clock update_clock;
     std::vector<std::shared_ptr<body>> bodys;
 
@@ -33,6 +37,7 @@ class game_engine{
     void event_handler();
     void update(sf::Time elapsed_time);
     void draw();
+    void create_gui();
   public:
     game_engine(sf::VideoMode video_mode, std::string title, std::vector<std::string> arguments);
     void main_loop();

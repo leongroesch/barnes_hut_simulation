@@ -41,16 +41,16 @@ void body::compute_collision()
 }
 
 /* ##################### Public #####################*/
-void body::update(sf::Time elapsed_time)
+void body::update(sf::Time elapsed_time, float simulation_speed)
 {
   // Calculate movement
   acceleration.x = force.x / mass;
   acceleration.y = force.y / mass;
 
   force.x = 0; force.y = 0;
-  velocity += acceleration * (elapsed_time.asSeconds() * (float)36e4);
+  velocity += acceleration * (elapsed_time.asSeconds() * (float)36e4 * simulation_speed);
 
-  circle_shape.move(velocity * (elapsed_time.asSeconds() * (float)36e4));
+  circle_shape.move(velocity * (elapsed_time.asSeconds() * (float)36e4 * simulation_speed) );
 
   compute_collision();
 }

@@ -6,6 +6,8 @@
 game_engine::game_engine(sf::VideoMode video_mode, std::string title, std::vector<std::string> arguments) 
                 : window(video_mode, title), barnes(field_size)
 { 
+  create_gui();
+
   bool centralized = false;
   if(arguments.size() >= 2 && arguments.at(0) == "centralized")
     centralized = true;
@@ -91,6 +93,7 @@ void game_engine::event_handler()
         }
       }
       window.setView(view);
+      gui.handleEvent(event);
   }
 }
 
@@ -125,7 +128,7 @@ void game_engine::update(sf::Time elapsed_time)
 
     for(auto it = bodys.begin(); it != bodys.end(); )
     {
-      (*it)->update(elapsed_time);
+      (*it)->update(elapsed_time, slider->getValue());
 
       if( std::isnan((*it)->get_velocity().x) || std::isnan((*it)->get_velocity().y) )
       {
@@ -156,11 +159,25 @@ void game_engine::draw()
 
   window.setView(window.getDefaultView());
   //Draw stuff unaffected by view
+  gui.draw();
   window.draw(fps.get_text());
   window.setView(view);
 
   // barnes.draw_rects(window);
   window.display();
+}
+
+void game_engine::create_gui()
+{
+  tgui::Label::Ptr label = tgui::Label::create("Simulation speed: ");
+  label->setPosition(15, window.getSize().y-50);
+  label->getRenderer()->setTextColor(tgui::Color::White);
+  gui.add(label);
+
+  slider = tgui::Slider::create(1, 301);
+  slider->setSize(150, 10);
+  slider->setPosition(20, window.getSize().y-20);
+  gui.add(slider);
 }
 
 /* ##################### Public #####################*/
