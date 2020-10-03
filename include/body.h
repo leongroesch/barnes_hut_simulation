@@ -6,6 +6,7 @@
 #include <SFML/Graphics.hpp>
 #include <cmath>
 #include <memory>
+
 class body{
   private:
     constexpr static double big_g{6.67e-11};
@@ -33,7 +34,7 @@ class body{
     void check_collision(std::shared_ptr<body> other);
 
     void set_remove();
-
+    
     bool get_remove() const;
     sf::CircleShape get_circle_shape() const;
     float get_distance(sf::Vector2f point) const;
@@ -47,4 +48,5 @@ class body{
 
 
 };
+
 #endif

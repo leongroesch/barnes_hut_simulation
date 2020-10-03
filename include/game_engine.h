@@ -14,10 +14,13 @@
 #include "barnes_hut.h"
 #include "json_parser.h"
 #include "fps.h"
+#include "user_interface.h"
+
+#include "ostream_operator.h"
 
 class game_engine{
   private:
-    float field_size{0};
+    float field_size{1e8};
 
     sf::RenderWindow window;
     sf::View view;
@@ -30,16 +33,18 @@ class game_engine{
 
     barnes_hut barnes;
     FPS fps;
+    user_interface ui;
 
     bool paused{true};
 
-    void random_bodys();
     void event_handler();
     void update(sf::Time elapsed_time);
     void draw();
     void create_gui();
+
   public:
     game_engine(sf::VideoMode video_mode, std::string title, std::vector<std::string> arguments);
+    void restart_simulation(float body_count, float min_mass, float max_mass);
     void main_loop();
 };
 

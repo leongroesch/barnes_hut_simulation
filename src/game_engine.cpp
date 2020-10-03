@@ -3,28 +3,37 @@
 
 /* ##################### Constructor #####################*/
 
+using namespace std::placeholders;
+
 game_engine::game_engine(sf::VideoMode video_mode, std::string title, std::vector<std::string> arguments) 
-                : window(video_mode, title), barnes(field_size)
+                : window(video_mode, title), barnes(field_size), ui(sf::VideoMode(400, 700), 
+                  std::bind(&game_engine::restart_simulation, this, _1 , _2, _3 ))
 { 
   create_gui();
 
+  bool import_json = false;
   bool centralized = false;
-  if(arguments.size() >= 2 && arguments.at(0) == "centralized")
-    centralized = true;
-  std::string file = "";
-  if(arguments.size() >= 2)
-    file = "../initial_conditions/" + arguments.at(1);
 
-  for(auto& bod : Json_parser::parse(file, centralized))
+  if(arguments.size() >= 2)
+    import_json = true;
+  if(import_json && arguments.at(0) == "centralized")
+    centralized = true;
+
+  if(import_json)
   {
-    auto max_dist = std::max(bod.get_center().x, bod.get_center().y);
-    field_size = std::max(field_size, max_dist );
-    bodys.push_back(std::make_shared<body>(bod));
-    barnes.insert_body(bodys.back());
+    std::string file = "";
+    file = "../initial_conditions/" + arguments.at(1) + ".json";
+
+    for(auto& bod : Json_parser::parse(file, centralized))
+    {
+      auto max_dist = std::max(bod.get_center().x, bod.get_center().y);
+      field_size = std::max(field_size, max_dist );
+      bodys.push_back(std::make_shared<body>(bod));
+      //barnes.insert_body(bodys.back());
+    }
+    field_size = std::ceil(field_size + field_size/100);
   }
 
-  field_size = std::ceil(field_size + field_size/100);
-  
   sf::FloatRect view_rect(-field_size, -field_size, field_size*2, field_size*2);
   view.reset(view_rect);
   barnes.reset(view_rect);
@@ -34,30 +43,6 @@ game_engine::game_engine(sf::VideoMode video_mode, std::string title, std::vecto
 }
 
 /* ##################### Private #####################*/
-void game_engine::random_bodys()
-{
-  const int num_body = 1500;
-  const double mass_enhancement = 10e15;
-
-  std::random_device random_device;
-  std::mt19937 random_engine(random_device());
-  std::uniform_int_distribution<int> dist_position(0, field_size);
-  std::uniform_int_distribution<int> dist_velocity(field_size/1000 *-1, field_size/1000);
-  std::uniform_int_distribution<int> dist_mass_hole(field_size/5000, field_size/600);
-  std::uniform_int_distribution<int> dist_mass_small(field_size/5000, field_size/1000);
-
-  for(uint16_t i = 0; i < num_body; i++)
-  {
-    sf::Vector2f position(dist_position(random_engine), dist_position(random_engine));
-    sf::Vector2f velocity(dist_velocity(random_engine), dist_velocity(random_engine));
-    sf::Vector2f acceleration(0,0);
-    double mass = (i%11 == 0) ? dist_mass_hole(random_engine) : dist_mass_small(random_engine);
-    mass *= mass_enhancement;
-    std::cout << "Mass: "<< mass << "\n";
-    bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, mass, mass/mass_enhancement)));
-    barnes.insert_body(bodys.back());
-  }
-}
 
 void game_engine::event_handler()
 {
@@ -95,6 +80,7 @@ void game_engine::event_handler()
       window.setView(view);
       gui.handleEvent(event);
   }
+  ui.handle_event();
 }
 
 void game_engine::update(sf::Time elapsed_time)
@@ -115,17 +101,6 @@ void game_engine::update(sf::Time elapsed_time)
       barnes.apply_forces(x);
     }
 
-    /* Brute Force */ 
-
-    // for(auto& x : bodys)
-    // {
-    //   for(auto& y : bodys)
-    //   {
-    //     if(x != y)
-    //       x->apply_force(y->get_center(), y->get_mass() );
-    //   }
-    // }
-
     for(auto it = bodys.begin(); it != bodys.end(); )
     {
       (*it)->update(elapsed_time, slider->getValue());
@@ -137,7 +112,6 @@ void game_engine::update(sf::Time elapsed_time)
       if((*it)->get_remove())
       {
         it = bodys.erase(it);
-        std::cout << "Removed\n";
       }
       else
         it++;
@@ -159,8 +133,10 @@ void game_engine::draw()
 
   window.setView(window.getDefaultView());
   //Draw stuff unaffected by view
+  ui.draw();
   gui.draw();
   window.draw(fps.get_text());
+
   window.setView(view);
 
   // barnes.draw_rects(window);
@@ -181,6 +157,33 @@ void game_engine::create_gui()
 }
 
 /* ##################### Public #####################*/
+
+void game_engine::restart_simulation(float body_count, float min_mass, float max_mass)
+{
+  bodys.clear();
+  auto radius_factor = field_size/(5e2*max_mass);
+
+  std::random_device random_device;
+  std::mt19937 random_engine(random_device());
+  std::uniform_real_distribution<float> dist_position(-(field_size/2), field_size/2);
+  std::uniform_real_distribution<float> dist_velocity(field_size/1000 *-1, field_size/1000);
+  std::uniform_real_distribution<float> dist_mass(min_mass, max_mass);
+
+  std::cout << "Field_size: " << field_size << "\n";
+  for(uint16_t i = 0; i < body_count; i++)
+  {
+    sf::Vector2f position(dist_position(random_engine), dist_position(random_engine));
+    std::cout << "Position: " << position << "\n";
+    sf::Vector2f velocity(0, 0); //(dist_velocity(random_engine), dist_velocity(random_engine));
+    sf::Vector2f acceleration(0,0);
+    double mass = dist_mass(random_engine);
+    bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, mass, mass * radius_factor)));
+    //barnes.insert_body(bodys.back());
+  }
+
+  //paused = false;
+
+}
 
 void game_engine::main_loop()
 {

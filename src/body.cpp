@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-
 /* ##################### Constructor #####################*/
 
 body::body(sf::Vector2f position, sf::Vector2f velocity, sf::Vector2f acceleration, double mass, float radius) 
@@ -32,8 +31,8 @@ void body::compute_collision()
     area += M_PI * std::pow(combine_with->get_radius(), 2) * loss_factor;
     circle_shape.setRadius( std::sqrt(area / M_PI));
 
-    velocity.x += combine_with->get_velocity().x;
-    velocity.y += combine_with->get_velocity().y;
+    velocity.x += combine_with->get_velocity().x * (combine_with->get_mass()/ mass);
+    velocity.y += combine_with->get_velocity().y * (combine_with->get_mass()/ mass);
 
     combine_with.reset();
   }
