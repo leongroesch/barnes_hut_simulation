@@ -15,18 +15,19 @@ class user_interface
     tgui::Grid::Ptr grid_layout;
 
     tgui::Button::Ptr start_button; 
+    tgui::TextBox::Ptr field_size_tb;
     tgui::TextBox::Ptr num_body_tb;
     tgui::TextBox::Ptr max_mass_tb;
     tgui::TextBox::Ptr min_mass_tb;
 
-    std::function<void(float, float, float) > start_callback;
+    std::function<void(float, float, float, float) > start_callback;
 
     static constexpr int textbox_width{70};
     
     void start_pressed() const;
 
   public:
-    user_interface(sf::VideoMode vidoe_mode, std::function<void(float, float, float)> start_callback);
+    user_interface(sf::VideoMode vidoe_mode, std::function<void(float, float, float, float)> start_callback);
 
     void handle_event();
     void draw();

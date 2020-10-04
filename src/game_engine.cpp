@@ -6,8 +6,8 @@
 using namespace std::placeholders;
 
 game_engine::game_engine(sf::VideoMode video_mode, std::string title, std::vector<std::string> arguments) 
-                : window(video_mode, title), barnes(field_size), ui(sf::VideoMode(400, 700), 
-                  std::bind(&game_engine::restart_simulation, this, _1 , _2, _3 ))
+                : window(video_mode, title), barnes(field_size), ui(sf::VideoMode(400, 350), 
+                  std::bind(&game_engine::restart_simulation, this, _1 , _2, _3, _4 ))
 { 
   create_gui();
 
@@ -19,6 +19,8 @@ game_engine::game_engine(sf::VideoMode video_mode, std::string title, std::vecto
   if(import_json && arguments.at(0) == "centralized")
     centralized = true;
 
+  float new_field_size = field_size;
+
   if(import_json)
   {
     std::string file = "";
@@ -27,19 +29,14 @@ game_engine::game_engine(sf::VideoMode video_mode, std::string title, std::vecto
     for(auto& bod : Json_parser::parse(file, centralized))
     {
       auto max_dist = std::max(bod.get_center().x, bod.get_center().y);
-      field_size = std::max(field_size, max_dist );
+      new_field_size = std::max(new_field_size, max_dist );
       bodys.push_back(std::make_shared<body>(bod));
       //barnes.insert_body(bodys.back());
     }
-    field_size = std::ceil(field_size + field_size/100);
+    new_field_size = std::ceil(new_field_size + new_field_size/100);
   }
 
-  sf::FloatRect view_rect(-field_size, -field_size, field_size*2, field_size*2);
-  view.reset(view_rect);
-  barnes.reset(view_rect);
-
-  field_size = 2*field_size;
-  window.setView(view);
+  set_field_size(2*new_field_size);
 }
 
 /* ##################### Private #####################*/
@@ -53,11 +50,7 @@ void game_engine::event_handler()
         window.close();
       }
       else if (event.type == sf::Event::KeyPressed){
-        if (event.key.code == sf::Keyboard::Space){
-          paused = !paused;
-          std::cout << "Toggle Pause\n";
-        }
-        else if (event.key.code == sf::Keyboard::Up)
+        if (event.key.code == sf::Keyboard::Up)
           view.move(0,  scrool_speed * -1);
         else if (event.key.code == sf::Keyboard::Down)
           view.move(0, scrool_speed);
@@ -85,38 +78,26 @@ void game_engine::event_handler()
 
 void game_engine::update(sf::Time elapsed_time)
 {
-  if (!paused)
+  fps.update(elapsed_time);
+  barnes.reset();
+  for(auto& x : bodys)
   {
-    fps.update(elapsed_time);
-    barnes.reset();
-    for(auto& x : bodys)
+     barnes.insert_body(x);
+  }
+  /* Barnes Hut */
+  for(auto& x : bodys)
+  {
+     barnes.apply_forces(x);
+  }
+  for(auto it = bodys.begin(); it != bodys.end(); )
+  {
+    (*it)->update(elapsed_time, slider->getValue());
+    if((*it)->get_remove())
     {
-      barnes.insert_body(x);
+      it = bodys.erase(it);
     }
-
-    /* Barnes Hut */
-
-    for(auto& x : bodys)
-    {
-      barnes.apply_forces(x);
-    }
-
-    for(auto it = bodys.begin(); it != bodys.end(); )
-    {
-      (*it)->update(elapsed_time, slider->getValue());
-
-      if( std::isnan((*it)->get_velocity().x) || std::isnan((*it)->get_velocity().y) )
-      {
-        paused = true;
-      }
-      if((*it)->get_remove())
-      {
-        it = bodys.erase(it);
-      }
-      else
-        it++;
-      
-    }
+    else
+      it++;
   }
 }
 
@@ -150,16 +131,27 @@ void game_engine::create_gui()
   label->getRenderer()->setTextColor(tgui::Color::White);
   gui.add(label);
 
-  slider = tgui::Slider::create(1, 301);
+  slider = tgui::Slider::create(0, 300);
   slider->setSize(150, 10);
   slider->setPosition(20, window.getSize().y-20);
   gui.add(slider);
 }
 
+void game_engine::set_field_size(float field_size)
+{
+  sf::FloatRect view_rect(-field_size/2, -field_size/2, field_size, field_size);
+  view.reset(view_rect);
+  barnes.reset(view_rect);
+
+  this->field_size = field_size;
+  window.setView(view);
+}
+
 /* ##################### Public #####################*/
 
-void game_engine::restart_simulation(float body_count, float min_mass, float max_mass)
+void game_engine::restart_simulation(float field_size, float body_count, float min_mass, float max_mass)
 {
+  set_field_size(field_size);
   bodys.clear();
   auto radius_factor = field_size/(5e2*max_mass);
 
@@ -180,8 +172,6 @@ void game_engine::restart_simulation(float body_count, float min_mass, float max
     bodys.push_back(std::make_shared<body>(body(position, velocity, acceleration, mass, mass * radius_factor)));
     //barnes.insert_body(bodys.back());
   }
-
-  //paused = false;
 
 }
 

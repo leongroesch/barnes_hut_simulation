@@ -35,16 +35,16 @@ class game_engine{
     FPS fps;
     user_interface ui;
 
-    bool paused{true};
-
     void event_handler();
     void update(sf::Time elapsed_time);
     void draw();
     void create_gui();
 
+    void set_field_size(float field_size);
+
   public:
     game_engine(sf::VideoMode video_mode, std::string title, std::vector<std::string> arguments);
-    void restart_simulation(float body_count, float min_mass, float max_mass);
+    void restart_simulation(float field_size, float body_count, float min_mass, float max_mass);
     void main_loop();
 };
 
